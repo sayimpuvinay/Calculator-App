@@ -129,6 +129,8 @@ function reducer(state, { type, payload }) {
           ...state,
           currentOperand: percentageValue.toString(),
         };
+    default:
+    return state;
   }
 }
 
