@@ -1,7 +1,10 @@
-import { useReducer } from "react"
-import DigitButton from "./DigitButton"
-import OperationButton from "./OperationButton"
-import "./styles.css"
+import React from "react";
+import { useReducer } from "react";
+import DigitButton from "./DigitButton";
+import OperationButton from "./OperationButton";
+import "./styles.css";
+
+const PERCENTAGE = "%";
 
 export const ACTIONS = {
   ADD_DIGIT: "add-digit",
@@ -9,7 +12,8 @@ export const ACTIONS = {
   CLEAR: "clear",
   DELETE_DIGIT: "delete-digit",
   EVALUATE: "evaluate",
-}
+  PERCENTAGE: "percentage"
+};
 
 function reducer(state, { type, payload }) {
   switch (type) {
@@ -112,6 +116,19 @@ function reducer(state, { type, payload }) {
         operation: null,
         currentOperand: evaluate(state),
       }
+
+    case ACTIONS.PERCENTAGE:
+        if (state.currentOperand == null) return state;
+  
+        const current = parseFloat(state.currentOperand);
+        if (isNaN(current)) return state;
+  
+        const percentageValue = current / 100;
+  
+        return {
+          ...state,
+          currentOperand: percentageValue.toString(),
+        };
   }
 }
 
@@ -137,6 +154,11 @@ function evaluate({ currentOperand, previousOperand, operation }) {
     case "÷":
       computation = prev / current
       break
+    case "%":
+      computation = (prev / 100) * current  // Perform the percentage calculation here
+      break
+    default:
+      return ""
   }
 
   return computation.toString()
@@ -169,16 +191,19 @@ function App() {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(
     reducer,
     {}
-  )
+  );
 
   return (
     <div className="calculator-grid">
+      {/* Output display */}
       <div className="output">
         <div className="previous-operand">
           {formatOperand(previousOperand)} {operation}
         </div>
         <div className="current-operand">{formatOperand(currentOperand)}</div>
       </div>
+
+      {/* Calculator buttons */}
       <button
         className="span-two"
         onClick={() => dispatch({ type: ACTIONS.CLEAR })}
@@ -188,29 +213,28 @@ function App() {
       <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>
         DEL
       </button>
-      <OperationButton operation="÷" dispatch={dispatch} />
-      <DigitButton digit="1" dispatch={dispatch} />
-      <DigitButton digit="2" dispatch={dispatch} />
-      <DigitButton digit="3" dispatch={dispatch} />
-      <OperationButton operation="*" dispatch={dispatch} />
-      <DigitButton digit="4" dispatch={dispatch} />
-      <DigitButton digit="5" dispatch={dispatch} />
-      <DigitButton digit="6" dispatch={dispatch} />
-      <OperationButton operation="+" dispatch={dispatch} />
-      <DigitButton digit="7" dispatch={dispatch} />
-      <DigitButton digit="8" dispatch={dispatch} />
-      <DigitButton digit="9" dispatch={dispatch} />
-      <OperationButton operation="-" dispatch={dispatch} />
-      <DigitButton digit="." dispatch={dispatch} />
-      <DigitButton digit="0" dispatch={dispatch} />
-      <button
-        className="span-two"
-        onClick={() => dispatch({ type: ACTIONS.EVALUATE })}
-      >
+      <OperationButton dispatch={dispatch} operation="÷" />
+      <DigitButton dispatch={dispatch} digit="1" />
+      <DigitButton dispatch={dispatch} digit="2" />
+      <DigitButton dispatch={dispatch} digit="3" />
+      <OperationButton dispatch={dispatch} operation="*" />
+      <DigitButton dispatch={dispatch} digit="4" />
+      <DigitButton dispatch={dispatch} digit="5" />
+      <DigitButton dispatch={dispatch} digit="6" />
+      <OperationButton dispatch={dispatch} operation="+" />
+      <DigitButton dispatch={dispatch} digit="7" />
+      <DigitButton dispatch={dispatch} digit="8" />
+      <DigitButton dispatch={dispatch} digit="9" />
+      <OperationButton dispatch={dispatch} operation="-" />
+      <DigitButton dispatch={dispatch} digit="." />
+      <DigitButton dispatch={dispatch} digit="0" />
+      <OperationButton dispatch={dispatch} operation={PERCENTAGE} /> {/* Use DigitButton for Percentage */}
+      <button onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>
         =
       </button>
     </div>
-  )
+  );
 }
+
 
 export default App
